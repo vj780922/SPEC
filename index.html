@@ -7,154 +7,210 @@
     <style>
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
         body {
             font-family: Calibri, "Microsoft JhengHei", "微軟正黑體", sans-serif;
-            background-color: #f4f6f8;
-            color: #333;
-            margin: 0;
-            padding: 12px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
-        }
-        
-        /* Logo 與頁首區域 */
-        .header-area {
+            background-color: #f8fafc;
+            color: #334155;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e2e8f0;
-            text-align: center;
-        }
-        .logo-img {
-            max-height: 48px;
-            width: auto;
-            object-fit: contain;
-        }
-        h1 {
-            font-size: 1.25rem;
-            color: #1a365d;
-            margin: 0;
-            font-weight: bold;
+            min-height: 100vh;
         }
 
-        /* 控制面板與控制元件 */
-        .control-panel {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 12px;
-            background: #f8fafc;
-            padding: 14px;
-            border-radius: 6px;
-            border: 1px solid #e2e8f0;
-            margin-bottom: 16px;
+        /* 系統主要容器 (Layout) */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
         }
+
+        /* 左側邊欄 (Sidebar) */
+        .sidebar {
+            width: 100%;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .header-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .logo-svg {
+            height: 38px;
+            width: auto;
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-title .company {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.05em;
+        }
+
+        .brand-title h1 {
+            font-size: 1.1rem;
+            color: #0f172a;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        /* 控制面板與表單 */
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
         .form-group {
             display: flex;
             flex-direction: column;
-        }
-        label {
-            font-size: 0.85rem;
-            font-weight: bold;
-            margin-bottom: 4px;
-            color: #4a5568;
-        }
-        select, input[type="text"] {
-            padding: 10px 12px;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            background-color: #fff;
-            width: 100%;
-            -webkit-appearance: none;
-        }
-        select:focus, input:focus {
-            outline: none;
-            border-color: #3182ce;
-            box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
-        }
-        select:disabled, input:disabled {
-            background-color: #edf2f7;
-            cursor: not-allowed;
+            gap: 6px;
         }
 
-        .stats-info {
-            font-size: 0.85rem;
-            color: #718096;
-            margin-bottom: 12px;
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        select, input[type="text"] {
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            background-color: #ffffff;
+            color: #0f172a;
+            width: 100%;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        select:disabled, input:disabled {
+            background-color: #f1f5f9;
+            color: #94a3b8;
+            cursor: not-allowed;
+            border-color: #e2e8f0;
+        }
+
+        /* 右側主要內容區 (Main Content) */
+        .main-content {
+            flex: 1;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-x: hidden;
+        }
+
+        .stats-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 14px 20px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+            color: #64748b;
             font-weight: 500;
         }
 
-        /* 桌機端：傳統表格 */
+        /* 數據表格區域 */
         .table-container {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
             overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
             text-align: left;
         }
-        th, td {
-            padding: 10px 12px;
-            border: 1px solid #e2e8f0;
-        }
+
         th {
-            background-color: #2b6cb0;
-            color: #ffffff;
+            background-color: #f8fafc;
+            color: #475569;
             font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
             white-space: nowrap;
         }
-        tr:nth-child(even) {
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
             background-color: #f8fafc;
         }
+
         .no-data {
             text-align: center;
-            padding: 24px;
-            color: #a0aec0;
+            padding: 48px 16px;
+            color: #94a3b8;
+            font-size: 0.95rem;
         }
 
-        /* 電腦版寬螢幕 Grid 佈局 (寬度 >= 768px) */
-        @media (min-width: 768px) {
-            body {
-                padding: 24px;
-            }
-            .container {
-                padding: 24px;
-            }
-            .header-area {
+        /* 桌機端：側邊欄固定與雙欄佈局 (寬度 >= 840px) */
+        @media (min-width: 840px) {
+            .app-container {
                 flex-direction: row;
-                justify-content: space-between;
-                text-align: left;
             }
-            .logo-img {
-                max-height: 52px;
+
+            .sidebar {
+                width: 320px;
+                min-width: 320px;
+                height: 100vh;
+                position: sticky;
+                top: 0;
+                border-right: 1px solid #e2e8f0;
+                border-bottom: none;
+                padding: 32px 24px;
+                overflow-y: auto;
             }
-            h1 {
-                font-size: 1.5rem;
-            }
-            .control-panel {
-                grid-template-columns: repeat(2, 1fr);
+
+            .main-content {
+                padding: 32px;
+                max-width: calc(100vw - 320px);
             }
         }
 
-        @media (min-width: 1024px) {
-            .control-panel {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-
-        /* 手機端特別優化：自動將表格轉為卡片 (寬度 < 768px) */
+        /* 手機端：卡片式表格優化 (寬度 < 768px) */
         @media (max-width: 767px) {
             table, thead, tbody, th, td, tr {
                 display: block;
@@ -165,20 +221,19 @@
                 left: -9999px;
             }
             tr {
-                margin-bottom: 12px;
+                margin: 12px;
                 border: 1px solid #e2e8f0;
                 border-radius: 8px;
-                background-color: #ffffff !important;
-                box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-                padding: 8px 12px;
+                background-color: #ffffff;
+                padding: 12px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.03);
             }
             td {
                 border: none;
-                border-bottom: 1px solid #f0f4f8;
+                border-bottom: 1px solid #f8fafc;
                 position: relative;
                 padding: 8px 0 8px 45%;
                 text-align: right;
-                font-size: 0.9rem;
                 word-break: break-word;
             }
             td:last-child {
@@ -188,17 +243,15 @@
                 position: absolute;
                 top: 8px;
                 left: 0;
-                width: 42%;
-                padding-right: 10px;
+                width: 40%;
                 white-space: nowrap;
                 text-align: left;
-                font-weight: bold;
-                color: #4a5568;
+                font-weight: 600;
+                color: #64748b;
                 content: attr(data-label);
             }
             .no-data {
-                padding: 16px 0;
-                text-align: center;
+                padding: 24px 0;
             }
             .no-data::before {
                 display: none;
@@ -208,55 +261,68 @@
 </head>
 <body>
 
-<div class="container">
-    <!-- 頁首與 Logo -->
-    <div class="header-area">
-        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAATEAAAA1CAIAAACm4UudAAAQAElEQVR4AexcB1hTSdcmCUnoTZCOoiA1E1ogCChSBOk11NCbCCh2LAgIqIgoiAUbFiwoCoogKFiwoaIUpCgoRUDpIioIAtL3vXPfG9x333sz930/v2/nn3kyOzMzu3N3/sycOTOTv7+f4/C25C3x24cAgffvd3x71/9fEOD+Xy3i2+u3x/83BBz/by3I4233Wyv+mRDwAPL/38LwS/i+24D+S7e2p63/EwjwO/+f/0kR/3Pfe55A3mX/Dwk8gPy/pPCvneI2sK3t/5wEDyD/S9367s+53wO+5x0QeAD5X1zJ/1xN0vaB35Xo/i0E/x8p2vb3vxL15yX69z3i3ynX2+S312+rXf+2m/+5+f67/vD/2p/e/m4I3O3b/eA2z7cnePse+C0mewA4G3O3XmI90d+d3m4AOP07gOwtq3/3C/qf31X4L1e9+v+q3m//Xw0A7vI7U/S3366x17/6+/1f/Y9//9v7D6v34/dvt2/v/e9q3t56sO03y3yzeL/p/v+WjC/E+/9lI8g9v43Bv3Gj5z/e8802/5f22f/+O/jW2/3vdzG93x1A/eY1f3P6m72/vef/+3vb/+veX//z/9/m7T9q46/6yW/fe9sf/r94/p99a///bfrfe/N/e/P/j+f+u9e8/48/z3f3mzf/S/t/u2S//2/e9k9+m2C/5/2vS3y7xf/f6uPf+m1/8xO/eQ6+ff1/94P+43/9x4T+5//7b/p/09v/5/NfE3q7w0335yD/y8O9fQLc/952B9x2A15uX2I94Xtr/Z9XyR7I3dr++2D8v7i7e3eK3+76XyD2P7//d/Xp7xP8v6k6f43iTfF7/5sE257/2/f4XyfwX3m//1dneO3X/00Yf972b2L713/z/3+S78LzP762//v1vxL+O59/m3T//u+a39p/0/i3L739d482+3+b0Ldt/x09/v2L//c5+O1P35/f/L23eXv7v0j7r/G9vfdt27/s7+11/2vbL/6//f2/Xvfbc35r8D8B6L986m/31Ldr9p/X+P4q8p+f3x7vAAnm/X+s2j/1f9vu354H+O6+t74HkP9/Afmftu23zXzbNfS3/56A/S3L+f4/3573e3u8ve7vvW/f/o8x31792y/4zSLeGvnvftv231m933v332H75jffP+X/D4X+P988gLxL+9/e3X573b9e4033z56m3iX3bw98a4W83f5L9L9e9O3r/9Xb87+/N+m9/ff2v5269z/u53y/8Htn979d5C+e8j+D5S93699j/a8S3p/fe9se+f8B/V//w18D7/f/O/hfvf3v8e2X/2/9/p8C/R/+/80x+1sAedP9u4BvK+m3q+G/J3o/p/v943sX5O33//Hj/x8D/M3bf9vst3X5p3z37S+/v/X7e7/8/p+a1f/6N43/8X998/Xb56/f7/i/4/7XgO6v7v+3Bv4v//8vjvlfb/P/J3T/+i///8/1/+3x/31/314G3v6/vebfH/lfe9ffb/d/u+s/e+9/+P4Xz4s3x+/e/s4I/Dfvftf5X03+n+P/Xzz8b3S3/+W6/14S/y3Xf815+/e/O+P+Xwnvv1pLvw/4X1O6fU394zn+82X57fS72f3m/H5X+3633O9e9W8a++939l+2//tM/5uE/oXy/0f8vxHuvyC43+j/b/f/N4H94wn34v9/P4Tve/q/24I33/83eH8fQf/d63A3qrfbbx/89qrvl9+/+4T/m+j/7Xy9Te9393373m9N7k543//f/p/3b1/9d5/2338ffuv3X4r//+3+9x65u8mfe/63+/9X4L+P0v+08t3I+G3F+e/f32/v+S3I3fPfe34LuD9a0X+/1G//8f+/vfXvevhf0f+/Nf1fIPl/331393+/2++x/9sL/t//y43vXv9vnfS39vxvev+/3v8u9O153yb9W723N/3/HwI/vv/+L6/f9e+2e1vAty/w/x2A/kI4fwnA5vV/eE7e7vu3/3/P9qYfEfj9f//uO2+e/+/17bZ3Uf3d/dveA+fbf972G7ff92/L+U0a/1PZ+q9X+0sSfr/p9o7vj/9fgvhX/f7X0/2//2x2z/53R3/P+X/eA+9/84O/3S3e+l8A8rfN92m3P2/+/2u8Lfh7X96+E0G3A3e4++m+O4I5c/63aX773tv0f0vX32T/I/rf39ve2x3u3473P5j6n7L9/f33B3j/H5x/t+e/e9a3/c1v8f/2pP92/13/t3T+56X+5a5/v+H/pT+9q/zX43yTxbdr9m8vA3/9xrd99R//9v/fPv+3N34X4u+/xbfV3y/5Wwf4X2D7d5X97f/vX3L6C3y3Pfwvcvvf/3v3H2/336H2L6T1+zL9lyp9e/s36X5bd/3N1e+X4m3f2x03P576/Tfw3fI3aX0j8S+1f9v+1z2/BczfrvwvlP23i3wzx5vyL5C8rfR3d3z/6+3vf+9/198/BPD/114BfXsf+55a828v+d8E3vP1XyR2v0b/1r5/5wT3+7v5Xwv6G17v3x/w///jO+xvv6O+ve63ff13A9Bfwfn7wP3+iP/t39sH+N5S+3Yk/88I8dve+q9E5G0f+y0E3473b6S+9fO3S36Twvf4vUj/861vq1//B4X3G494e/p//y8Q+s1I+a/X/39v8a1vbx/xG//Xp3X/fE++334F3J4/eL63v+sB4/8Kev99R3w36v/G6bfH//c4eI/z30d52579S2j83wH2t3f5n7D339f/v0Xvvyn8/3vK/7u4/++949sCflv0P17hWwn/O9H5t2v+3p9/963//o674bf+/d+/97dD4/3G+/9zAn2/4v9S1P90i+f/C57/FfA20v++s7792v/3d7f9x2433/5v+u15v1X1X/3/XwH8Dwb+833/9xL9b4zvvf/X/m2f/Zse+Ddr3l4S/25u36/P/l+B7/s98m3L//x9/m+6/78B75/E303i97j3x2f9z/f45//5P3b+2/3XFf7fAf+e/0N4+y///+P5fz/x+P+tEvyfV//fAez3R+Bf/s/fbfvfP/C3pvhvuS8C37v/z0vwX9f7dzn+L1K/++Nf1v8f3v6/D+d//3+B3O8C+a/3+C0l/v3K/2sTfuv/zR/4+x/539r+a/t3Afv91v9d5n/29+/3f4vUf/cQvvXm27b/Lwr5H2b9u139l9i/1fS/vP+3Vf23G/4Pffm9/3vJ/hvx/3sUvj98v93/Gwf/xvvvXfC/yv9257+S+D7E+5vX/5vX/30UvA/j7fW43/7vf4fg/+18+7/98x+r4a/g/q1I/fvd/+fF+d//uO6//0/8e/m/u+z/f+z2P8p+XzH3WwH+21sI//9a63eA8W/E91+5f6+A3172e/3fNf/H57eS51/f+j5Q3l3/23f/2wb/z6f/i1/+Xzv3r5O6E5r/t1L/738K5b+H+/3d+2+f47//XpS3j//fFfDfb//fD4X/T0Fvf68H/B+629/88/tf/9/3+K/q91fQvx31b83/a6v4r4j/D+e/s20D+C/a/O4N/97+H07x5sT997N/j2f3+4P9/uL++I/G/I5a/H/6y9uv+J9s4m8C913o3638v0jx5vf3j2f++1D/P3sE/Meb/j9m/v+/Svh3y/uT2P+Sgvcfy+mPQP8vL/jfbvyX8P2X6/9N//8eXf7m5/+3H//79f32G//9A/9vL/p/C/xbfv97jN4E3x9f8rfl36//2353f47f2+N3wN4q/Z8g4m8S/u30bx/4W/m/78n/f9m/O9P9y9N/y7sC8vf5/+z3/+59fN//m+l32/sL0L/3I7+/u/+eG3/96v+O/i+f+xP971L/v1vff8jR/x09/jtf9R/+6/fG6O5y8/9a1/46/p/57j43/80K/+/S89++5++e6R87/Cehv/s9/b9r3L59+p/S9zeX/S6K7/59//73r2P4+///d9T/+5L7/x4+/f/x6m3/IcHftvn93z52+/3+573fCvxvE/f3A+z34eUeL/8f8v9XQfh3S4y//SgA/0uO+3fB3/7n21v+71742/H4b/H393X+O03e23N+U+p/n2D+5+e928q2f0S96YHv5/8eUe+N3fvd0/924X//93/+r5j4r/j7+6f++z39/z3C+m8/cHu638K//f3vH3H/x1S8R/e/e/r3L8X9m8H7D4/4j8f/23f/99f1/+7C3yb8e7L/z9a+R2+/2fvb/f3X5/982e0v32+7v+XqtzvC76+0+/uA4f2x3e4Dffuf/u/497/X5e3r29f3+G+833/2t3H/3X3eI/+p+e//7jH//T/4/q+d+P2U//2d9x///89+A7X9/b9u2r3/40n9/2H/3/9aU/+9x//8//2e/n//6x+b53+P/a2f/7/fbf+7+7eL+p4X391/B/87Bf5/U///N2793+X6nyn/e1D7L6X1X4v8z9X6v4/eH++//5P34P//d9P/e1v9/y/l3xO8yft3y/f837v9f+r/2//7f/P3j4f8u9/+P0/Svx3hP8z2+P4P1P0XgP2rSvyuPv9/p+D3S/zXfP96/9sn+1vv++P+t93/m66/72C33f/P9v0/V3O7y3e/3X8S5H+/25vh99u9/y76vw3v/v+uHfxu1f+fM3/226P53a/98R0A8l/e4f+uAf7dCv/6/u8P8X793m7X8P73y9/2I/y+n++X+M/l+L58x3b/f/ff33/3X+X9bS2/+9x0C4O/m+Hvv4e/e6n+b6n/f+P2n/mI98//b+D+A3r+x2r526//yX/+BfX+3w7c91m/O7Hvhvt/4vC/H35/86ffvfz7/yH4v3Xb3yX9/8/3vwP+9z//x7f+H9//41P/93v/e0D/7p9+/r9i3u2A6e326W9v+/321N/G33/+j6vw/yX4O3//5mD79//x/v5vh3q/y+r/+4H+D92//6vY/1//f/3eI3/fA/93Ift3Afs///f3w/13+f7/c3+/C5L3928L4vf4m9P3Gwf8jxf8l1f93f+/N///fXf8+9v6XyPw3yHif8/9H7A530H8N+X/3a//+oXfOvw/Efnf9u+/L/+fUu5/n4q///yfhPnfBfrvwvy3m/iN67sA3sL29wveA/d/Ovx///9/+3s8+O1sA+sPQP3u7n+E+f5+E/Dfg+d3B64/w5vB/P3p+j3k3qf//r+/C+/f33+s3y7/C1X/v9H37vL39m/7+f8i6/676f//f4+E/3//u+S/jffv53j7+1//n7/++G896u2/+xvg//I23m2R3//3j335vwfv/9fTfgfS3/b178L33/9n/9///2//O1z0fxrC3yL/8d3/Adf953f+/f9/h//95+499//S5f9G/f228d++/d/0/2eXvf//vfz4G/39vfvf0N3+22q/PfgvIvr/n33i3wvuL7P+3x//++v5b4X9G4m9C/j/d+/2v/fS//5fL++3n+e32n13/S/79z9a3/9fC/E/33T/E8p9+49/f6fE/+/s3xbSbfvP2Hw3mP/pif/u//eM3eE2/fvdvT+/398G3D3Xm9Xvf/z0/O//zfv/1e3b5e43/99I8e31+/+0q/5f2r1X/v+tMf9/nSbgX9/3P3H5p338y378V3f92/A+//X3f0jU28u/+973d42+vfe3i/j/W8/99qXf79N/I9//fOvfXfrfsN1A739+A/+yH7/H4F79/i4I+N9499tX//7e+xXm/48j899m++2q9f/K/d6S8i/9fwn3G/2/kfwfwff/xM79f8y+/d/O6e+I++32I4C3F0X3/2vL/s0f3g7f/+9I/Ovd//74p5f3l7T319p///8A8m//X8N326N//S5+/w7/243+20T+X1b65vfvv3/3G/4P5H999L+y4P+y2/X//Xfv8P4+5//yff++/u+t3v+dM/+3G/+L3rftv77+r6/5p89vG/5L6v8/29f8f4a3/9/U3wPOfx+m/5uW/f/8/+1u7f329N9Xy/v359sA3x4eXj3d//5/w2983oP82+n953v93y+1/4Dmfy21vwvh//6+veX/v2f/e5C3/Sj//f7W7e7S+/f/+03Sfg/yL4O+Tfgvf//p2/79Xwvwt//5//A9f/fI+/eX9yfy3z3039/9bwrvfvf//x///vf7f9ve/+7A/y3/++O4p3vf8//+Gffvf5fA/093+f++4j+67f8r9Xf94bf/P8H8/9vX2w/9z95/++0e3x57P6f38//99+/v3d/v33f9H9b4e/7y0/9/++P/2oK3p/O4223p33vfL9S++G+n/L+r3q4R3x8/155/O4r5f4Lp/+/7u+32j3845f+3yff/+8/33/vf7X81yv++/yN6u+v/A5L3n9f8S3P428v1f7P1+/z27/P34Pf274+f/9+1+X+H8e4L++2//639v73+9+n63vC/t//z/+P+3f9f/74f/8//b5vf8/v9T+/+l+v/+v7v5vvv3v/u1/49wN8C++1X93/811P9+/+0S+u+93//h/e//8fbf3/i7z/f3v//e6fA//f/5/+91v3e2/2/H+L//3Lff/3e+3uC/++q/zeN/5fU31f8/T+C++8E5G//eLsf3/S3gff7wP9m3f/S+q+a7ff2ePv3r8p/f3v4492/68l/98s/8v++iA3E8m0B87fb/sP1/w+g3/n//jvh/A9P/e/63X6//yvh3634e3//9v+f325v234bXfe30f6O+H9a8m9/42++4d868K74+7d88A2x+/t/5yX/a7t/7e0/m+O/u//3y/++2eX/f6H9r/jS//4e87s978D/u3v//7f8rX/eX33+7yL9/a//2+//ffG+e73p3yvv7x4s7n8bxfef/9sC2T8d/u8d8T6g+G+//28u/yvhfwL4Xwf253359k+F+x+t9C1m8nfb/5L/ve++p4+3B/4/6vf/+3+u/z/u7201//0m8D+37+/3f1/4P2//i58AAt7vfvfE3+3oP8249x397ff2n+L39vv/20d8A9f/m//4/k7jO+//7+X///eM7//i//0/0v+//f3fv3L797/e5/j//i78H8/v4f1v/322//6D/+3//iL/5u53S+q///L+//e/238b9v2e8f19I/D3O/83/Xp4e/p4e/n5mH3b+S859x8l//vI/++H0f+n//+vf/3/e+/++6v3X8v9f4v0X2/4Xzff2/x2v3x6ePl6eP2f+v7//XN9vL3/T5C3e4fH//wO++///++17v/+9+7d4e3x833b/383/u3//3/++t2e3v/31s2L83f12fXp3evv/f2N69ff0f2fM++/A8C35+//fXp6efv5+Xn7+/j6X4C93d8b/H8I3v3e/X98P8ffx3j7e/v4+fn7/B4Qefv4+3p5e/f0dPf23w7dvn3ff2fN12s/029PDy//S+/2/p8/p9+/a09PLy/9m/m///9//wI" alt="WASON Logo" class="logo-img">
-        <h1>點膠耗材規格查詢系統</h1>
-    </div>
-
-    <!-- 控制與篩選面板 -->
-    <div class="control-panel">
-        <div class="form-group">
-            <label for="sheetSelect">1. 選擇耗材類別</label>
-            <select id="sheetSelect">
-                <!-- 由 JS 動態寫入，預設無選取 -->
-            </select>
+<div class="app-container">
+    <!-- 左側邊欄區域 -->
+    <aside class="sidebar">
+        <div class="header-area">
+            <!-- WASON 向量 Logo -->
+            <svg class="logo-svg" viewBox="0 0 200 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="200" height="50" rx="6" fill="#1E293B"/>
+                <path d="M25 15L33 35L41 15L49 35L57 15" stroke="#38BDF8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                <text x="68" y="32" fill="#FFFFFF" font-family="Calibri, sans-serif" font-size="22" font-weight="bold" letter-spacing="1">WASON</text>
+            </svg>
+            <div class="brand-title">
+                <span class="company">華勝科技</span>
+                <h1>點膠耗材規格查詢</h1>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="columnSelect">2. 依據欄位篩選</label>
-            <select id="columnSelect" disabled>
-                <option value="">-- 請先選擇耗材類別 --</option>
-            </select>
+        <div class="control-panel">
+            <div class="form-group">
+                <label for="sheetSelect">1. 選擇耗材類別</label>
+                <select id="sheetSelect">
+                    <!-- 由 JS 動態寫入 -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="columnSelect">2. 依據欄位篩選</label>
+                <select id="columnSelect" disabled>
+                    <option value="">-- 請先選擇耗材類別 --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="valueSelect">3. 選擇規格 / 數值</label>
+                <select id="valueSelect" disabled>
+                    <option value="">-- 全部條件 --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="searchInput">4. 關鍵字快速搜尋</label>
+                <input type="text" id="searchInput" placeholder="輸入關鍵字..." disabled>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 右側主要數據顯示區域 -->
+    <main class="main-content">
+        <div class="stats-card">
+            <span id="statsInfo">請先選取「耗材類別」以檢視規格資料。</span>
         </div>
 
-        <div class="form-group">
-            <label for="valueSelect">3. 選擇規格 / 數值</label>
-            <select id="valueSelect" disabled>
-                <option value="">-- 全部條件 --</option>
-            </select>
+        <div class="table-container">
+            <table id="dataTable">
+                <thead>
+                    <tr id="tableHeader"></tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td class="no-data">請先於左側選取耗材類別開始查詢</td></tr>
+                </tbody>
+            </table>
         </div>
-
-        <div class="form-group">
-            <label for="searchInput">4. 關鍵字快速搜尋</label>
-            <input type="text" id="searchInput" placeholder="輸入關鍵字..." disabled>
-        </div>
-    </div>
-
-    <div class="stats-info" id="statsInfo">請先選取「耗材類別」以檢視規格資料。</div>
-
-    <!-- 數據顯示區域 -->
-    <div class="table-container">
-        <table id="dataTable">
-            <thead>
-                <tr id="tableHeader"></tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr><td class="no-data">請選擇耗材類別開始查詢</td></tr>
-            </tbody>
-        </table>
-    </div>
+    </main>
 </div>
 
 <script>
@@ -351,7 +417,7 @@
     let currentData = [];
     let currentHeaders = [];
 
-    // 初始化頁面 (設定無預設值)
+    // 初始化頁面
     function init() {
         sheetSelect.innerHTML = '<option value="">-- 請選擇耗材類別 --</option>';
         Object.keys(database).forEach(sheetName => {
@@ -362,11 +428,10 @@
         });
     }
 
-    // 當選擇耗材類別變更時
+    // 切換耗材類別
     sheetSelect.addEventListener('change', function() {
         currentSheetName = this.value;
         if (!currentSheetName) {
-            // 未選擇類別時重置狀態
             columnSelect.innerHTML = '<option value="">-- 請先選擇耗材類別 --</option>';
             columnSelect.disabled = true;
             valueSelect.innerHTML = '<option value="">-- 全部條件 --</option>';
@@ -374,7 +439,7 @@
             searchInput.disabled = true;
             searchInput.value = '';
             tableHeader.innerHTML = '';
-            tableBody.innerHTML = '<tr><td class="no-data">請選擇耗材類別開始查詢</td></tr>';
+            tableBody.innerHTML = '<tr><td class="no-data">請先於左側選取耗材類別開始查詢</td></tr>';
             statsInfo.textContent = '請先選取「耗材類別」以檢視規格資料。';
             return;
         }
@@ -387,7 +452,6 @@
         currentHeaders = sheetData.headers;
         currentData = sheetData.rows;
 
-        // 重置欄位選單
         columnSelect.innerHTML = '<option value="">-- 全部欄位 --</option>';
         currentHeaders.forEach(header => {
             const option = document.createElement('option');
@@ -405,7 +469,7 @@
         applyFilters();
     }
 
-    // 依據選取的欄位動態產生條件選項
+    // 切換篩選欄位
     columnSelect.addEventListener('change', function() {
         const selectedCol = this.value;
         if (!selectedCol) {
@@ -431,7 +495,7 @@
     valueSelect.addEventListener('change', applyFilters);
     searchInput.addEventListener('input', applyFilters);
 
-    // 篩選數據與渲染
+    // 篩選機制
     function applyFilters() {
         if (!currentSheetName) return;
 
@@ -458,6 +522,7 @@
         renderTable(filteredData, currentHeaders);
     }
 
+    // 渲染表格
     function renderTable(data, headers) {
         tableHeader.innerHTML = '';
         tableBody.innerHTML = '';
@@ -479,14 +544,13 @@
             headers.forEach(h => {
                 const td = document.createElement('td');
                 td.textContent = row[h] !== undefined ? row[h] : '';
-                // 增加 data-label 屬性供手機版卡片顯示標題
                 td.setAttribute('data-label', h);
                 tr.appendChild(td);
             });
             tableBody.appendChild(tr);
         });
 
-        statsInfo.textContent = `類別：${currentSheetName} | 共 ${data.length} 筆資料`;
+        statsInfo.textContent = `當前類別：${currentSheetName} ｜ 共檢索到 ${data.length} 筆資料`;
     }
 
     init();
