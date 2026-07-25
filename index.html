@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 規格資料動態查詢系統</title>
-    <!-- SheetJS CDN 用於解析 Excel 檔案 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <title>華勝科技 (WASON) 點膠耗材規格查詢系統</title>
     <style>
         * {
             box-sizing: border-box;
@@ -55,7 +53,7 @@
             margin-bottom: 6px;
             color: #4a5568;
         }
-        select, input[type="text"], input[type="file"] {
+        select, input[type="text"] {
             padding: 8px 12px;
             border: 1px solid #cbd5e0;
             border-radius: 4px;
@@ -88,6 +86,7 @@
             font-weight: 600;
             position: sticky;
             top: 0;
+            white-space: nowrap;
         }
         tr:nth-child(even) {
             background-color: #f7fafc;
@@ -110,60 +109,126 @@
 <body>
 
 <div class="container">
-    <h1>Excel 產品規格與資訊查詢系統</h1>
+    <h1>華勝科技 (WASON) 點膠耗材規格查詢系統</h1>
 
     <div class="control-panel">
         <div class="form-group">
-            <label for="excelFile">1. 選擇 Excel 檔案 (.xlsx / .xls)</label>
-            <input type="file" id="excelFile" accept=".xlsx, .xls">
+            <label for="sheetSelect">1. 選擇耗材類別 (工作表)</label>
+            <select id="sheetSelect"></select>
         </div>
 
         <div class="form-group">
-            <label for="sheetSelect">2. 選擇分類 / 工作表</label>
-            <select id="sheetSelect" disabled>
-                <option value="">-- 請先上傳 Excel 檔案 --</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label for="columnSelect">3. 依據欄位篩選</label>
-            <select id="columnSelect" disabled>
+            <label for="columnSelect">2. 依據欄位篩選</label>
+            <select id="columnSelect">
                 <option value="">-- 全部欄位 --</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="valueSelect">4. 選擇規格 / 數值</label>
+            <label for="valueSelect">3. 選擇規格 / 數值</label>
             <select id="valueSelect" disabled>
                 <option value="">-- 全部條件 --</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label for="searchInput">5. 關鍵字快速搜尋</label>
-            <input type="text" id="searchInput" placeholder="輸入關鍵字..." disabled>
+            <label for="searchInput">4. 關鍵字搜尋</label>
+            <input type="text" id="searchInput" placeholder="搜尋任意規格關鍵字...">
         </div>
     </div>
 
-    <div class="stats-info" id="statsInfo">請先選擇並上傳檔案以開啟查詢。</div>
+    <div class="stats-info" id="statsInfo">載入中...</div>
 
     <div class="table-container">
         <table id="dataTable">
             <thead>
                 <tr id="tableHeader"></tr>
             </thead>
-            <tbody id="tableBody">
-                <tr><td class="no-data">尚未載入任何資料</td></tr>
-            </tbody>
+            <tbody id="tableBody"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    let workbook = null;
-    let currentData = [];
+    // 內建 Excel 資料庫數據
+    const database = {
+      "靜動態混合管系列": {
+        "headers": ["混合模式 (Type)", "規格 (Model)", "管身外徑 A (mm)", "長度 L (mm)", "攪拌葉片 Φ外徑 (mm)", "攪拌葉片 節數 (Elements)"],
+        "rows": [
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MA3.0-17S", "管身外徑 A (mm)": 4.4, "長度 L (mm)": 62, "攪拌葉片 Φ外徑 (mm)": 3, "攪拌葉片 節數 (Elements)": 17},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MA5.4-17S", "管身外徑 A (mm)": 7.6, "長度 L (mm)": 103, "攪拌葉片 Φ外徑 (mm)": 5.4, "攪拌葉片 節數 (Elements)": 17},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MA6.3-21S", "管身外徑 A (mm)": 8.7, "長度 L (mm)": 153, "攪拌葉片 Φ外徑 (mm)": 6.3, "攪拌葉片 節數 (Elements)": 21},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MX5.4-17S", "管身外徑 A (mm)": 7.6, "長度 L (mm)": 103, "攪拌葉片 Φ外徑 (mm)": 5.4, "攪拌葉片 節數 (Elements)": 17},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MC05-18", "管身外徑 A (mm)": 8, "長度 L (mm)": 122, "攪拌葉片 Φ外徑 (mm)": 5, "攪拌葉片 節數 (Elements)": 18},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MC06-24", "管身外徑 A (mm)": 9.5, "長度 L (mm)": 188, "攪拌葉片 Φ外徑 (mm)": 6.3, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MC08-24", "管身外徑 A (mm)": 11.5, "長度 L (mm)": 224, "攪拌葉片 Φ外徑 (mm)": 8, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MC10-24", "管身外徑 A (mm)": 14, "長度 L (mm)": 268, "攪拌葉片 Φ外徑 (mm)": 10, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MC13-24", "管身外徑 A (mm)": 17, "長度 L (mm)": 312, "攪拌葉片 Φ外徑 (mm)": 13, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MS05-24", "管身外徑 A (mm)": 8, "長度 L (mm)": 122, "攪拌葉片 Φ外徑 (mm)": 5, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MS06-24", "管身外徑 A (mm)": 9.5, "長度 L (mm)": 188, "攪拌葉片 Φ外徑 (mm)": 6.3, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MS08-24", "管身外徑 A (mm)": 11.5, "長度 L (mm)": 224, "攪拌葉片 Φ外徑 (mm)": 8, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MS10-24", "管身外徑 A (mm)": 14, "長度 L (mm)": 268, "攪拌葉片 Φ外徑 (mm)": 10, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "靜態混合管 (Static)", "規格 (Model)": "MS13-24", "管身外徑 A (mm)": 17, "長度 L (mm)": 312, "攪拌葉片 Φ外徑 (mm)": 13, "攪拌葉片 節數 (Elements)": 24},
+          {"混合模式 (Type)": "動態混合管 (Dynamic)", "規格 (Model)": "RM12-26", "管身外徑 A (mm)": 16, "長度 L (mm)": 180, "攪拌葉片 Φ外徑 (mm)": 12, "攪拌葉片 節數 (Elements)": 26},
+          {"混合模式 (Type)": "動態混合管 (Dynamic)", "規格 (Model)": "RM17-16", "管身外徑 A (mm)": 21, "長度 L (mm)": 180, "攪拌葉片 Φ外徑 (mm)": 17, "攪拌葉片 節數 (Elements)": 16},
+          {"混合模式 (Type)": "動態混合管 (Dynamic)", "規格 (Model)": "RM17-26", "管身外徑 A (mm)": 21, "長度 L (mm)": 235, "攪拌葉片 Φ外徑 (mm)": 17, "攪拌葉片 節數 (Elements)": 26},
+          {"混合模式 (Type)": "動態混合管 (Dynamic)", "規格 (Model)": "RS17-26", "管身外徑 A (mm)": 21, "長度 L (mm)": 235, "攪拌葉片 Φ外徑 (mm)": 17, "攪拌葉片 節數 (Elements)": 26}
+        ]
+      },
+      "針頭 TT 系列": {
+        "headers": ["規格 (Model / Gauge)", "顏色 (Color)", "內徑 ID (mm)", "長度 L (mm)", "主要材質", "適用膠材與特點"],
+        "rows": [
+          {"規格 (Model / Gauge)": "14G", "顏色 (Color)": "橄欖綠 (Olive)", "內徑 ID (mm)": 1.55, "長度 L (mm)": 32, "主要材質": "PP (聚丙烯)", "適用膠材與特點": "錐形斜口設計，防止高黏度膠材阻塞，出膠順暢"},
+          {"規格 (Model / Gauge)": "16G", "顏色 (Color)": "灰 (Grey)", "內徑 ID (mm)": 1.2, "長度 L (mm)": 32, "主要材質": "PP (聚丙烯)", "適用膠材與特點": "適用於高黏度膠水、填縫膠、矽膠、黃膠等"},
+          {"規格 (Model / Gauge)": "18G", "顏色 (Color)": "綠 (Green)", "內徑 ID (mm)": 0.84, "長度 L (mm)": 32, "主要材質": "PP (聚丙烯)", "適用膠材與特點": "流體流動阻力小，可大幅提升點膠效率"},
+          {"規格 (Model / Gauge)": "20G", "顏色 (Color)": "粉紅 (Pink)", "內徑 ID (mm)": 0.6, "長度 L (mm)": 32, "主要材質": "PP (聚丙烯)", "適用膠材與特點": "適用於中高黏度液體，具備良好的防刮傷特性"},
+          {"規格 (Model / Gauge)": "22G", "顏色 (Color)": "藍 (Blue)", "內徑 ID (mm)": 0.41, "長度 L (mm)": 32, "主要材質": "PP (聚丙烯)", "適用膠材與特點": "適合精細線條塗膠，塑膠材質不刮傷工件表面"},
+          {"規格 (Model / Gauge)": "25G", "顏色 (Color)": "紅 (Red)", "內徑 ID (mm)": 0.26, "長度 L (mm)": 32, "主要材質": "PP (聚丙烯)", "適用膠材與特點": "精密微量點膠，雙螺紋鎖緊安全座頭"},
+          {"規格 (Model / Gauge)": "27G", "顏色 (Color)": "透明 (Clear)", "內徑 ID (mm)": 0.21, "長度 L (mm)": 32, "主要材質": "PP (聚丙烯)", "適用膠材與特點": "極細微量點膠需求"}
+        ]
+      },
+      "針頭 SS 系列": {
+        "headers": ["規格 (Gauge)", "座顏色 (Color)", "內徑 ID (mm)", "外徑 OD (mm)", "常用針管長度 (Inches/mm)", "主要材質", "適用膠材與特點"],
+        "rows": [
+          {"規格 (Gauge)": "14G", "座顏色 (Color)": "橄欖綠", "內徑 ID (mm)": 1.55, "外徑 OD (mm)": 1.84, "常用針管長度 (Inches/mm)": "1/2\" (13mm), 1\" (25mm)", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "通用型精密點膠，耐溶劑腐蝕，高壓下不脫落"},
+          {"規格 (Gauge)": "15G", "座顏色 (Color)": "琥珀色", "內徑 ID (mm)": 1.37, "外徑 OD (mm)": 1.81, "常用針管長度 (Inches/mm)": "1/2\" (13mm), 1\" (25mm)", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "適用於快乾膠、UV膠、環氧樹脂、Solder Paste"},
+          {"規格 (Gauge)": "18G", "座顏色 (Color)": "綠色", "內徑 ID (mm)": 0.84, "外徑 OD (mm)": 1.27, "常用針管長度 (Inches/mm)": "1/4\", 1/2\", 1\"", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "無毛邊處理，確保點膠精度與一致性"},
+          {"規格 (Gauge)": "20G", "座顏色 (Color)": "粉紅色", "內徑 ID (mm)": 0.6, "外徑 OD (mm)": 0.91, "常用針管長度 (Inches/mm)": "1/4\", 1/2\", 1\"", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "雙螺紋鎖緊座頭，安全防止高壓氣飛針"},
+          {"規格 (Gauge)": "21G", "座顏色 (Color)": "紫色", "內徑 ID (mm)": 0.51, "外徑 OD (mm)": 0.82, "常用針管長度 (Inches/mm)": "1/4\", 1/2\", 1\"", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "適用自動化點膠機、點膠閥"},
+          {"規格 (Gauge)": "22G", "座顏色 (Color)": "藍色", "內徑 ID (mm)": 0.41, "外徑 OD (mm)": 0.72, "常用針管長度 (Inches/mm)": "1/4\", 1/2\", 1\"", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "標準精密電子零組件塗膠"},
+          {"規格 (Gauge)": "23G", "座顏色 (Color)": "橙色", "內徑 ID (mm)": 0.34, "外徑 OD (mm)": 0.63, "常用針管長度 (Inches/mm)": "1/4\", 1/2\", 1\"", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "微量定量點膠"},
+          {"規格 (Gauge)": "25G", "座顏色 (Color)": "紅色", "內徑 ID (mm)": 0.26, "外徑 OD (mm)": 0.51, "常用針管長度 (Inches/mm)": "1/4\", 1/2\"", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "高精度點膠與劃線"},
+          {"規格 (Gauge)": "27G", "座顏色 (Color)": "透明", "內徑 ID (mm)": 0.21, "外徑 OD (mm)": 0.42, "常用針管長度 (Inches/mm)": "1/4\", 1/2\"", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "極細微微點膠需求"},
+          {"規格 (Gauge)": "30G", "座顏色 (Color)": "黑色", "內徑 ID (mm)": 0.16, "外徑 OD (mm)": 0.31, "常用針管長度 (Inches/mm)": "1/4\", 1/2\"", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "超高精密點膠，低黏度液體微量控制"},
+          {"規格 (Gauge)": "32G", "座顏色 (Color)": "黃色", "內徑 ID (mm)": 0.11, "外徑 OD (mm)": 0.26, "常用針管長度 (Inches/mm)": "1/4\" (6mm)", "主要材質": "不鏽鋼針管 + PP座", "適用膠材與特點": "極緻微量塗膠 (微電子/光學封裝)"}
+        ]
+      },
+      "針頭 TS 系列": {
+        "headers": ["規格 (Gauge)", "顏色 (Color)", "內徑 ID (mm)", "外徑 OD (mm)", "長度 L (Inches/mm)", "主要材質", "適用膠材與特點"],
+        "rows": [
+          {"規格 (Gauge)": "18G", "顏色 (Color)": "綠色", "內徑 ID (mm)": 0.84, "外徑 OD (mm)": 1.27, "長度 L (Inches/mm)": "1/2\" (13mm)", "主要材質": "Teflon 鐵氟龍塗層 / 軟管", "適用膠材與特點": "防止快乾膠(瞬間膠/Cyanoacrylate)堵塞針頭"},
+          {"規格 (Gauge)": "20G", "顏色 (Color)": "粉紅色", "內徑 ID (mm)": 0.6, "外徑 OD (mm)": 0.91, "長度 L (Inches/mm)": "1/2\" (13mm)", "主要材質": "Teflon 鐵氟龍塗層 / 軟管", "適用膠材與特點": "防刮傷敏感表面(如 LCD、鏡頭模組、鍍膜件)"},
+          {"規格 (Gauge)": "22G", "顏色 (Color)": "藍色", "內徑 ID (mm)": 0.41, "外徑 OD (mm)": 0.72, "長度 L (Inches/mm)": "1/2\" (13mm)", "主要材質": "Teflon 鐵氟龍塗層 / 軟管", "適用膠材與特點": "低黏度液體精準控制，流體不易沾黏針尖外壁"},
+          {"規格 (Gauge)": "25G", "顏色 (Color)": "紅色", "內徑 ID (mm)": 0.26, "外徑 OD (mm)": 0.51, "長度 L (Inches/mm)": "1/2\" (13mm)", "主要材質": "Teflon 鐵氟龍塗層 / 軟管", "適用膠材與特點": "適用於強酸、強鹼及具腐蝕性之化學液體點膠"},
+          {"規格 (Gauge)": "27G", "顏色 (Color)": "透明", "內徑 ID (mm)": 0.21, "外徑 OD (mm)": 0.42, "長度 L (Inches/mm)": "1/2\" (13mm)", "主要材質": "Teflon 鐵氟龍塗層 / 軟管", "適用膠材與特點": "超微量特殊化學膠材塗佈"}
+        ]
+      },
+      "膠桶系列": {
+        "headers": ["分類類別", "規格/容量 (Capacity)", "顏色/防光規格 (Color)", "配件內容 (Accessories)", "最大耐受壓力", "適用情境與設備"],
+        "rows": [
+          {"分類類別": "單組份美式點膠筒", "規格/容量 (Capacity)": "3cc", "顏色/防光規格 (Color)": "透明 (Standard) / 琥珀色 (UV防光) / 黑色 (全遮光)", "配件內容 (Accessories)": "點膠針筒、活塞、頭塞、尾塞", "最大耐受壓力": "100 psi (6.8 bar)", "適用情境與設備": "氣壓式自動點膠機、手動點膠槍，適用於各種電子級膠水"},
+          {"分類類別": "單組份美式點膠筒", "規格/容量 (Capacity)": "5cc", "顏色/防光規格 (Color)": "透明 (Standard) / 琥珀色 (UV防光) / 黑色 (全遮光)", "配件內容 (Accessories)": "點膠針筒、活塞、頭塞、尾塞", "最大耐受壓力": "100 psi (6.8 bar)", "適用情境與設備": "精密塗膠、晶片封裝、SMT點膠"},
+          {"分類類別": "單組份美式點膠筒", "規格/容量 (Capacity)": "10cc", "顏色/防光規格 (Color)": "透明 (Standard) / 琥珀色 (UV防光) / 黑色 (全遮光)", "配件內容 (Accessories)": "點膠針筒、活塞、頭塞、尾塞", "最大耐受壓力": "100 psi (6.8 bar)", "適用情境與設備": "通用型氣動點膠作業"},
+          {"分類類別": "單組份美式點膠筒", "規格/容量 (Capacity)": "30cc", "顏色/防光規格 (Color)": "透明 (Standard) / 琥珀色 (UV防光) / 黑色 (全遮光)", "配件內容 (Accessories)": "點膠針筒、活塞、頭塞、尾塞", "最大耐受壓力": "100 psi (6.8 bar)", "適用情境與設備": "大容量點膠需求、流水線自動化"},
+          {"分類類別": "單組份美式點膠筒", "規格/容量 (Capacity)": "55cc", "顏色/防光規格 (Color)": "透明 (Standard) / 琥珀色 (UV防光) / 黑色 (全遮光)", "配件內容 (Accessories)": "點膠針筒、活塞、頭塞、尾塞", "最大耐受壓力": "100 psi (6.8 bar)", "適用情境與設備": "高用量填縫膠、矽膠、結構膠"},
+          {"分類類別": "雙組份 AB 膠套筒", "規格/容量 (Capacity)": "50ml (1:1 / 2:1)", "顏色/防光規格 (Color)": "白色半透明 (PP)", "配件內容 (Accessories)": "雙聯卡筒、A/B活塞、密封蓋", "最大耐受壓力": "手動/氣動膠槍專用", "適用情境與設備": "50ml 雙組份卡式膠槍、搭配靜態混合管使用"},
+          {"分類類別": "雙組份 AB 膠套筒", "規格/容量 (Capacity)": "50ml (4:1 / 10:1)", "顏色/防光規格 (Color)": "白色半透明 (PP)", "配件內容 (Accessories)": "雙聯卡筒、專用不對稱活塞、密封蓋", "最大耐受壓力": "手動/氣動膠槍專用", "適用情境與設備": "特殊比例丙烯酸酯膠、壓克力膠混合"},
+          {"分類類別": "雙組份 AB 膠套筒", "規格/容量 (Capacity)": "200ml (1:1 / 2:1 / 4:1 / 10:1)", "顏色/防光規格 (Color)": "耐高壓工程塑膠", "配件內容 (Accessories)": "AB套筒、活塞組、固定鎖圈", "最大耐受壓力": "工業級重型膠槍", "適用情境與設備": "工業結構粘接、風電、汽車零組件封膠"},
+          {"分類類別": "雙組份 AB 膠套筒", "規格/容量 (Capacity)": "400ml (1:1 / 2:1 / 10:1)", "顏色/防光規格 (Color)": "耐高壓工程塑膠", "配件內容 (Accessories)": "AB套筒、活塞組、固定鎖圈", "最大耐受壓力": "工業級重型膠槍", "適用情境與設備": "大面積灌封、建築結構補強"}
+        ]
+      }
+    };
 
-    const fileInput = document.getElementById('excelFile');
     const sheetSelect = document.getElementById('sheetSelect');
     const columnSelect = document.getElementById('columnSelect');
     const valueSelect = document.getElementById('valueSelect');
@@ -172,94 +237,52 @@
     const tableBody = document.getElementById('tableBody');
     const statsInfo = document.getElementById('statsInfo');
 
-    // 1. 上傳並讀取 Excel 檔案
-    fileInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+    let currentSheetName = "";
+    let currentData = [];
+    let currentHeaders = [];
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            workbook = XLSX.read(data, { type: 'array' });
-
-            // 初始化 Sheet 下拉選單
-            sheetSelect.innerHTML = '';
-            workbook.SheetNames.forEach((sheetName, index) => {
-                const option = document.createElement('option');
-                option.value = sheetName;
-                option.textContent = sheetName;
-                sheetSelect.appendChild(option);
-            });
-
-            sheetSelect.disabled = false;
-            loadSheetData(workbook.SheetNames[0]);
-        };
-        reader.readAsArrayBuffer(file);
-    });
-
-    // 2. 切換工作表 (Sheet)
-    sheetSelect.addEventListener('change', function() {
-        loadSheetData(this.value);
-    });
-
-    // 載入指定工作表資料
-    function loadSheetData(sheetName) {
-        const worksheet = workbook.Sheets[sheetName];
-        // 將工作表轉為 JSON 陣列 (以第一列非空作為表頭)
-        const rawJson = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-        
-        if (!rawJson || rawJson.length === 0) {
-            tableHeader.innerHTML = '';
-            tableBody.innerHTML = '<tr><td class="no-data">此工作表無資料</td></tr>';
-            return;
-        }
-
-        // 尋找實質的表頭位置（跳過空行或標題文字）
-        let headerRowIndex = 0;
-        for (let i = 0; i < rawJson.length; i++) {
-            if (rawJson[i].length > 1) { // 假設包含欄位名稱的列會有複數欄
-                headerRowIndex = i;
-                break;
-            }
-        }
-
-        const headers = rawJson[headerRowIndex] || [];
-        const rows = rawJson.slice(headerRowIndex + 1);
-
-        // 整理 JSON 格式資料
-        currentData = rows.filter(row => row.length > 0).map(row => {
-            let obj = {};
-            headers.forEach((h, idx) => {
-                if (h) obj[h] = row[idx] !== undefined ? row[idx] : '';
-            });
-            return obj;
+    // 初始化頁面
+    function init() {
+        sheetSelect.innerHTML = '';
+        Object.keys(database).forEach(sheetName => {
+            const option = document.createElement('option');
+            option.value = sheetName;
+            option.textContent = sheetName;
+            sheetSelect.appendChild(option);
         });
 
-        // 初始化欄位篩選器
-        setupColumnSelect(headers.filter(Boolean));
-        renderTable(currentData, headers.filter(Boolean));
-        
-        // 啟用搜尋輸入框
-        searchInput.disabled = false;
-        searchInput.value = '';
+        currentSheetName = Object.keys(database)[0];
+        loadSheet(currentSheetName);
     }
 
-    // 設定「依據欄位篩選」選單
-    function setupColumnSelect(headers) {
+    // 切換分類/工作表
+    sheetSelect.addEventListener('change', function() {
+        currentSheetName = this.value;
+        loadSheet(currentSheetName);
+    });
+
+    function loadSheet(sheetName) {
+        const sheetData = database[sheetName];
+        currentHeaders = sheetData.headers;
+        currentData = sheetData.rows;
+
+        // 重置篩選下拉選單
         columnSelect.innerHTML = '<option value="">-- 全部欄位 --</option>';
-        headers.forEach(header => {
+        currentHeaders.forEach(header => {
             const option = document.createElement('option');
             option.value = header;
             option.textContent = header;
             columnSelect.appendChild(option);
         });
-        columnSelect.disabled = false;
-        
+
         valueSelect.innerHTML = '<option value="">-- 請先選擇欄位 --</option>';
         valueSelect.disabled = true;
+        searchInput.value = '';
+
+        applyFilters();
     }
 
-    // 3. 切換選取的欄位後，動態抓取該欄位的所有不重複數值
+    // 當選擇「欄位」變更時，動態提取該欄位的不重複值
     columnSelect.addEventListener('change', function() {
         const selectedCol = this.value;
         if (!selectedCol) {
@@ -282,24 +305,21 @@
         applyFilters();
     });
 
-    // 4. 下拉選單值變更與關鍵字搜尋監聽
     valueSelect.addEventListener('change', applyFilters);
     searchInput.addEventListener('input', applyFilters);
 
-    // 5. 綜合篩選邏輯
+    // 綜合過濾與渲染
     function applyFilters() {
         const selectedCol = columnSelect.value;
         const selectedVal = valueSelect.value;
         const keyword = searchInput.value.trim().toLowerCase();
 
         const filteredData = currentData.filter(row => {
-            // 欄位特定值篩選
             let matchCol = true;
             if (selectedCol && selectedVal) {
                 matchCol = String(row[selectedCol]) === selectedVal;
             }
 
-            // 全域關鍵字搜尋
             let matchKey = true;
             if (keyword) {
                 matchKey = Object.values(row).some(val => 
@@ -310,31 +330,21 @@
             return matchCol && matchKey;
         });
 
-        // 取得當前所有標題欄位
-        const headers = columnSelect.options.length > 1 
-            ? Array.from(columnSelect.options).slice(1).map(opt => opt.value)
-            : [];
-
-        renderTable(filteredData, headers);
+        renderTable(filteredData, currentHeaders);
     }
 
-    // 6. 渲染表格與統計數據
     function renderTable(data, headers) {
         tableHeader.innerHTML = '';
         tableBody.innerHTML = '';
 
-        if (headers.length === 0) return;
-
-        // 渲染表頭
         headers.forEach(h => {
             const th = document.createElement('th');
             th.textContent = h;
             tableHeader.appendChild(th);
         });
 
-        // 渲染表身
         if (data.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="${headers.length}" class="no-data">沒有符合條件的資料</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="${headers.length}" class="no-data">查無符合條件的數據</td></tr>`;
             statsInfo.textContent = '共 0 筆資料';
             return;
         }
@@ -349,8 +359,11 @@
             tableBody.appendChild(tr);
         });
 
-        statsInfo.textContent = `共顯示 ${data.length} 筆資料`;
+        statsInfo.textContent = `類別：${currentSheetName} | 共顯示 ${data.length} 筆資料`;
     }
+
+    // 開啟頁面時執行初始化
+    init();
 </script>
 
 </body>
